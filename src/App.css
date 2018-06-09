@@ -1,0 +1,70 @@
+.app {
+  padding: 15px;
+  background-color: #fcfcfc;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+.editor {
+  max-width: 700px;
+  padding: 45px 15px 15px;
+  flex: 1;
+  line-height: 1.75;
+}
+
+.editor ol, .editor ul {
+  padding-left: 24px;
+}
+
+.material-icons {
+  font-size: 20px;
+  vertical-align: text-bottom;
+}
+
+.menu > * + * {
+  margin-left: 10px;
+}
+
+.menu > * {
+  display: inline-block;
+}
+
+.toolbar-menu .button {
+  padding: 8px;
+  color: #C1C7D0;
+  cursor: pointer;
+  transition: 300ms all ease
+}
+
+.toolbar-menu .button:hover {
+  color: #8993A4;
+}
+
+.toolbar-menu .button[data-active='true'] {
+  color: #0065FF ;
+}
+
+.toolbar-menu {
+  padding: 4px 18px;
+  border-bottom: 1px solid #DFE1E5;
+  background: #FCFCFC;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 400;
+  display: flex;
+  justify-content: center;
+}
+
+.toolbar-menu .search {
+  position: relative;
+}
+
+.toolbar-menu .search-icon {
+  position: absolute;
+  top: 0.5em;
+  left: 0.5em;
+  color: #ccc;
+}
