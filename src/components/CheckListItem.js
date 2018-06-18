@@ -1,30 +1,34 @@
 import React from 'react'
 
 export default class CheckListItem extends React.Component {
-  constructor(props){
-    super(props);
-  }
-  
-  onClick = () => {
+  onCheckboxClick = (e) => {
+    e.preventDefault()
+    console.log('log this', e.target.nextSibling.textContent)
     const { editor, node } = this.props
     const checked = !node.data.get('checked')
     editor.change(c => c.setNodeByKey(node.key, { data: { checked } }))
+  }
+
+  onEditClick() {
+    
   }
 
   render() {
     const { attributes, children, node, readOnly } = this.props
     const checked = node.data.get('checked')
     return (
-      <div
+      <span
         className={`check-list-item ${checked ? 'checked' : ''}`}
         contentEditable={false}
         {...attributes}
       >
-        <div className={`checkbox ${checked ? 'checked' : ''}`} onClick={this.onClick}></div>
-        <span className="check-list-content" contentEditable={!readOnly} suppressContentEditableWarning>
+        <span className={`checkbox ${checked ? 'checked' : ''}`} onClick={this.onCheckboxClick}></span>
+        <span className={`check-list-content ${this.props.children[0].props.block.getText().length > 0 ? '' : 'placeholder'}`}
+        contentEditable={!readOnly} suppressContentEditableWarning>
           {children}
         </span>
-      </div>
+        <span title="Set due date" onClick={this.onEditClick} className="edit material-icons">event</span>
+      </span>
     )
   }
 }

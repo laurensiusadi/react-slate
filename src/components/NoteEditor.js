@@ -244,6 +244,7 @@ class NoteEditor extends React.Component {
       <div className="editor">
         <Editor
           placeholder="Enter some rich text..."
+          spellcheck={false} autocorrect={false}
           value={this.state.value}
           onChange={this.onChange}
           onKeyDown={this.onKeyDown}
@@ -279,8 +280,9 @@ class NoteEditor extends React.Component {
         return <li {...attributes}>{children}</li>
       case 'check-list-item':
         return <CheckListItem {...props} />
+      case 'paragraph':
       default: 
-        return
+        return <p {...attributes}>{children}</p>
     }
   }
 

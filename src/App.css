@@ -2,15 +2,18 @@
   padding: 15px;
   background-color: #fcfcfc;
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
 }
 
 .editor {
+  width: 100%;
   max-width: 700px;
-  padding: 45px 15px 15px;
-  flex: 1;
-  line-height: 1.75;
+  padding: 0 8px 100px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.editor h1 {
+  line-height: 1.1;
 }
 
 .editor ol, .editor ul {
@@ -22,17 +25,19 @@
 }
 .editor blockquote {
   margin-left: 2px;
+  margin-right: 0;
   padding-left: 26px;
   border-left: 3px solid #C1C7D0;
+  color: #7A869A;
 }
 
-.material-icons {
+.toolbar-menu .material-icons {
   font-size: 20px;
   vertical-align: text-bottom;
 }
 
 .menu > * + * {
-  margin-left: 10px;
+  margin-left: 4px;
 }
 
 .menu > * {
@@ -40,7 +45,7 @@
 }
 
 .toolbar-menu .button {
-  padding: 8px;
+  padding: 8px 20px 9px;
   color: #C1C7D0;
   cursor: pointer;
   transition: 300ms all ease
@@ -55,16 +60,18 @@
 }
 
 .toolbar-menu {
-  padding: 4px 18px;
-  border-bottom: 1px solid #DFE1E5;
+  padding: 0 6px 8px;
+  border-top: 1px solid #DFE1E5;
+  border-bottom: none;
   background: #FCFCFC;
   position: fixed;
-  top: 0;
+  bottom: 0;
   right: 0;
   left: 0;
   z-index: 400;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
+  overflow-x: auto;
 }
 
 .toolbar-menu .search {
@@ -78,14 +85,60 @@
   color: #ccc;
 }
 
-.check-list-item {
-  display: grid;
-  grid-template-columns: 30px 1fr;
+@media screen and (min-width:700px) {
+  .toolbar-menu {
+    padding: 4px 18px;
+    border-bottom: 1px solid #DFE1E5;
+    border-top: none;
+    top: 0;
+    bottom: auto;
+    justify-content: center;
+  }
+
+  .editor {
+    padding: 50px 15px 75px;
+    line-height: 1.75;
+  }
 }
 
-.check-list-item.checked {
-  color: #97A0AF;
+.check-list-item {
+  padding: 2px;
+  display: grid;
+  grid-template-columns: 28px 1fr 25px;
+}
+
+.check-list-item:hover {
+  background-color: #F4F5F7
+}
+
+.check-list-item.checked .check-list-content {
+  color: #7A869A;
   text-decoration: line-through;
+}
+
+.check-list-content.placeholder::before {
+  content: "Do something awesome today";
+  display: block;
+  position: absolute;
+  color: #C1C7D0;
+  pointer-events: none;
+}
+
+.check-list-item .edit {
+  display: none;
+  cursor: pointer;
+  vertical-align: text-bottom;
+}
+
+.check-list-item:hover .edit {
+  color: #C1C7D0;
+  display: block;
+  position: relative;
+  top: 3px;
+}
+
+.checkbox {
+  cursor: pointer;
 }
 
 .checkbox::after {
