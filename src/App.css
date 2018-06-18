@@ -14,7 +14,16 @@
 }
 
 .editor ol, .editor ul {
-  padding-left: 24px;
+  padding-left: 22px;
+}
+
+.editor ol li, .editor ul li {
+  padding-left: 8px;
+}
+.editor blockquote {
+  margin-left: 2px;
+  padding-left: 26px;
+  border-left: 3px solid #C1C7D0;
 }
 
 .material-icons {
@@ -67,4 +76,36 @@
   top: 0.5em;
   left: 0.5em;
   color: #ccc;
+}
+
+.check-list-item {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+}
+
+.check-list-item.checked {
+  color: #97A0AF;
+  text-decoration: line-through;
+}
+
+.checkbox::after {
+  display: inline-block;
+  background-size: 16px 16px;
+  content: url("assets/icons/icon-round-check.svg");
+  width: 16px;
+  height: 16px;
+  position: relative;
+  left: 2px;
+  top: 2px;
+}
+
+.checkbox.checked::after {
+  display: inline-block;
+  background-size: 16px 16px;
+  content: url("assets/icons/icon-round-checked.svg");
+  width: 16px;
+  height: 16px;
+  position: relative;
+  left: 2px;
+  top: 2px;
 }
