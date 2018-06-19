@@ -1,4 +1,5 @@
 import React from 'react'
+import debounce from 'lodash/debounce'
 import { Editor } from 'slate-react'
 import { Value } from 'slate'
 import { isKeyHotkey } from 'is-hotkey'
@@ -84,17 +85,34 @@ class NoteEditor extends React.Component {
     return value.blocks.some(node => node.type === type)
   }
 
+  iterateOverCheckListItems = debounce((change) => {
+    console.log('called')
+    change.operations
+      .filter(opr =>
+        // opr.type === 'remove_node' && 
+        opr.node && opr.node.type === 'check-list-item')
+      .map(opr => {
+        // decide between opr.type set_node and remove_node
+        console.log('ops:', opr.type,';', opr.node.text, opr.node.data.get('checked'))
+        // if(opr.node.data.get('hoodie') === undefined) {
+        //   change.setBlocks(opr.node.key, {data: { hoodie: 'task1234'} })
+        // }
+        // console.log('check: ', node.text, node.data.get('checked'), ';', node.data.get('hoodie'))
+        return opr
+      })
+  }, 500 )
+
   /** On change, save the new `value`. */
 
-  onChange = ({ value }) => {
-    if (value.document !== this.state.value.document) {
-      const content = JSON.stringify(value.toJSON())
+  onChange = (change) => {
+    if (change.value.document !== this.state.value.document) {
+      const content = JSON.stringify(change.value.toJSON())
       localStorage.setItem('content', content)
+      this.iterateOverCheckListItems(change)
     }
-    this.setState({ value })
+    this.setState({ value: change.value })
   }
 
-  
   /* On key down, if it's a formatting command toggle a mark. */
 
   onKeyDown = (event, change) => {
@@ -116,6 +134,8 @@ class NoteEditor extends React.Component {
           return this.onBackspace(event, change)
         case 'Enter':
           return this.onEnter(event, change)
+        case 'Delete':
+          return this.onDelete(event, change)
         default:
           return null
       }
@@ -191,7 +211,7 @@ class NoteEditor extends React.Component {
     )
   }
 
-  renderToolbar = () => {
+  renderToolbar() {
     return (
       <div className="menu toolbar-menu">
         {this.renderMarkButton('bold', 'format_bold')}
@@ -204,7 +224,6 @@ class NoteEditor extends React.Component {
         {this.renderBlockButton('block-quote', 'format_quote')}
         {this.renderBlockButton('numbered-list', 'format_list_numbered')}
         {this.renderBlockButton('bulleted-list', 'format_list_bulleted')}
-        {this.renderBlockButton('check-list-item', 'check_box')}
       </div>
     )
   }
@@ -239,12 +258,12 @@ class NoteEditor extends React.Component {
     )
   }
 
-  renderEditor = () => {
+  renderEditor() {
     return (
       <div className="editor">
         <Editor
           placeholder="Enter some rich text..."
-          spellcheck={false} autocorrect={false}
+          spellCheck={false} autoCorrect={false}
           value={this.state.value}
           onChange={this.onChange}
           onKeyDown={this.onKeyDown}
@@ -337,6 +356,36 @@ class NoteEditor extends React.Component {
   }
 
   /**
+   * On delete
+   */
+
+  onDelete = (event, change) => {
+    const { value } = change
+    if (value.isExpanded) return
+    
+    const { startBlock, endOffset, startKey, document } = value
+    const nextBlock = document.getNextBlock(startKey)
+    if (startBlock.type === 'paragraph') return
+
+    /* Allow deleting empty check list next to empty check list */
+    if (startBlock.type === 'check-list-item'
+      && startBlock.text.length === 0
+      && nextBlock && nextBlock.type === 'check-list-item'
+      && nextBlock.text.length === 0) {}
+      return
+
+    /* Do not allow deleting next block with text,
+      preventing merging check list */
+    if (endOffset === startBlock.text.length && nextBlock.text.length > 0) return true
+
+    /* Do not allow deleting empty check list */
+    if (startBlock.type === 'check-list-item' && startBlock.text.length === 0) return true
+
+    event.preventDefault()
+    return
+  }
+
+  /**
    * On backspace, if at the start of a non-paragraph, convert it back into a
    * paragraph node.
    *
@@ -349,22 +398,39 @@ class NoteEditor extends React.Component {
     if (value.isExpanded) return
     if (value.startOffset !== 0) return
 
-    const { startBlock } = value
+    const { startBlock, startKey, document } = value
+    const prevBlock = document.getPreviousBlock(startKey)
+
+    /**
+     * Do not allow deleting previous checklist block
+     * |checklist|
+     * < |text|
+     */
+    if (prevBlock && prevBlock.type === 'check-list-item'
+      && startBlock.text.length !== 0)
+      return true
+
     if (startBlock.type === 'paragraph') return
+
+    /** 
+     * Prevent changing checklist to paragraph
+     * [] < text
+     */
+    if ( value.isCollapsed &&
+      startBlock.type === 'check-list-item' &&
+      value.selection.startOffset === 0 && prevBlock.text.length !== 0
+    ) {
+      // allow deleting empty check list (?)
+      // if(startBlock.text.length === 0) return
+      console.log('prevent removing check list:', startBlock.text.length)
+      return true
+    }    
 
     event.preventDefault()
     change.setBlocks('paragraph')
 
     if (startBlock.type === 'list-item') {
       change.unwrapBlock('bulleted-list').unwrapBlock('numbered-list')
-    }
-
-    if ( value.isCollapsed &&
-      startBlock.type === 'check-list-item' &&
-      value.selection.startOffset === 0
-    ) {
-      change.setBlocks('paragraph')
-      return true
     }
 
     return true
@@ -383,8 +449,24 @@ class NoteEditor extends React.Component {
     if (value.isExpanded) return
 
     const { startBlock, startOffset, endOffset } = value
-    if (startOffset === 0 && startBlock.text.length === 0)
-      return this.onBackspace(event, change)
+
+    if (startBlock.type === 'check-list-item' && startBlock.text.length !== 0) {
+      if(endOffset === startBlock.text.length) {
+        console.log('create new check list')
+      }
+      change.splitBlock().setBlocks({ data: { checked: false } })
+      return true
+    }
+    
+
+    /**
+     * Create new paragraph block after empty check list
+     */
+    if (startOffset === 0 && startBlock.text.length === 0) {
+      // return this.onBackspace(event, change)
+      change.splitBlock().setBlocks('paragraph')
+      return true
+    }
     if (endOffset !== startBlock.text.length) return
 
     if (
@@ -397,11 +479,6 @@ class NoteEditor extends React.Component {
       startBlock.type !== 'block-quote'
     ) {
       return
-    }
-
-    if (startBlock.type === 'check-list-item') {
-      change.splitBlock().setBlocks({ data: { checked: false } })
-      return true
     }
 
     event.preventDefault()

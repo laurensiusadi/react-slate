@@ -85,26 +85,10 @@
   color: #ccc;
 }
 
-@media screen and (min-width:700px) {
-  .toolbar-menu {
-    padding: 4px 18px;
-    border-bottom: 1px solid #DFE1E5;
-    border-top: none;
-    top: 0;
-    bottom: auto;
-    justify-content: center;
-  }
-
-  .editor {
-    padding: 50px 15px 75px;
-    line-height: 1.75;
-  }
-}
-
 .check-list-item {
   padding: 2px;
   display: grid;
-  grid-template-columns: 28px 1fr 25px;
+  grid-template-columns: 28px 1fr 64px;
 }
 
 .check-list-item:hover {
@@ -125,16 +109,23 @@
 }
 
 .check-list-item .edit {
+  color: #C1C7D0;
+  position: relative;
+  top: 1px;
+  margin-left: 8px;
   display: none;
   cursor: pointer;
   vertical-align: text-bottom;
+  line-height: 1;
+  justify-content: space-around; 
 }
 
 .check-list-item:hover .edit {
-  color: #C1C7D0;
-  display: block;
-  position: relative;
-  top: 3px;
+  display: flex;
+}
+
+.check-list-item .edit .material-icons:hover {
+  color: #8993A4;
 }
 
 .checkbox {
@@ -161,4 +152,24 @@
   position: relative;
   left: 2px;
   top: 2px;
+}
+
+@media screen and (min-width:700px) {
+  .toolbar-menu {
+    padding: 4px 18px;
+    border-bottom: 1px solid #DFE1E5;
+    border-top: none;
+    top: 0;
+    bottom: auto;
+    justify-content: center;
+  }
+
+  .editor {
+    padding: 50px 15px 75px;
+    line-height: 1.75;
+  }
+
+  .check-list-item .edit {
+    top: 3px;
+  }
 }
